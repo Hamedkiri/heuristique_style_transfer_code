@@ -61,5 +61,5 @@ To retrain the models, use `--config_path` to specify the architecture and `--da
   python train_best_Multi_PatchGAN.py --data ./datasets --model_path checkpoints/Best_Multi_PatchGAN/best_model_all.pth --config_path checkpoints/Best_Multi_PatchGAN/best_hyperparameters_all.json --save_dir results/Models_Multi_patchGAN --epochs 200 --k_folds 2
   ```
 
-This `README.md` provides instructions on installing, testing, and training the models. Model weights are available at the following link: [Google Drive](https://drive.google.com/drive/folders/11Pllunglo-_XcZSI80WheTKOeqceW9II?usp=sharing).
+This `README.md` provides instructions on installing, testing, and training the models. Model weights are available at the following link: [Model weights on Google Drive](https://drive.google.com/drive/folders/11Pllunglo-_XcZSI80WheTKOeqceW9II?usp=sharing).
 ```
