@@ -11,8 +11,8 @@ from sklearn.model_selection import KFold
 import numpy as np
 import random
 
-from functions.RESNET50_Truncate import save_training_info, save_model_and_hyperparameters, load_hyperparameters, train_model,evaluate_model, generate_transform_combinations, load_training_info, load_best_model, AugmentedDataset
-from Models.RESNET50_TRUNCATE import TruncatedMoCoV3, Classifier
+from functions.functions_RESNET50_Truncate import save_training_info, save_model_and_hyperparameters, load_hyperparameters, train_model,evaluate_model, generate_transform_combinations, load_training_info, load_best_model, AugmentedDataset
+from Models.Models_RESNET50_TRUNCATE import TruncatedMoCoV3, Classifier
 
 
 

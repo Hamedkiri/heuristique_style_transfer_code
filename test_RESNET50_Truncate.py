@@ -12,8 +12,8 @@ from torch.utils.tensorboard import SummaryWriter
 import random
 
 import hdbscan
-from Models.RESNET50_TRUNCATE import TruncatedMoCoV3, Classifier, CombinedModel
-from functions.RESNET50_Truncate import load_best_model, compute_embeddings_with_paths, test, perform_tsne, run_camera, plot_tsne_interactive, list_available_cameras
+from Models.Models_RESNET50_TRUNCATE import TruncatedMoCoV3, Classifier, CombinedModel
+from functions.functions_RESNET50_Truncate import load_best_model, compute_embeddings_with_paths, test, perform_tsne, run_camera, plot_tsne_interactive, list_available_cameras
 
 
 def main():
