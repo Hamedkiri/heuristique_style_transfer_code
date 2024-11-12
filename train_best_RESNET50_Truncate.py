@@ -11,16 +11,24 @@ from sklearn.model_selection import KFold
 import numpy as np
 import random
 
-from functions.functions_RESNET50_Truncate import save_training_info, save_model_and_hyperparameters, load_hyperparameters, train_model,evaluate_model, generate_transform_combinations, load_training_info, load_best_model, AugmentedDataset
+from functions.functions_RESNET50_Truncate import (
+    save_training_info,
+    save_model_and_hyperparameters,
+    load_hyperparameters,
+    train_model,
+    evaluate_model,
+    generate_transform_combinations,
+    load_training_info,
+    load_best_model,
+    AugmentedDataset
+)
 from Models.Models_RESNET50_TRUNCATE import TruncatedMoCoV3, Classifier
-
-
 
 
 def main():
     parser = argparse.ArgumentParser(description='Fine-tuning MoCo v3 for Weather Classification')
     parser.add_argument('--data', type=str, required=True, help='Path to dataset root directory')
-    parser.add_argument('--model_path', type=str, required=True, help='Path to the best pre-trained MoCo v3 model')
+    parser.add_argument('--model_path', type=str, required=False, help='Path to the best pre-trained MoCo v3 model')
     parser.add_argument('--config_path', type=str, required=True, help='Path to the best hyperparameters configuration')
     parser.add_argument('--epochs', default=25, type=int, help='Number of epochs to train')
     parser.add_argument('--save_dir', default='saved_models', type=str, help='Directory to save trained models')
@@ -114,7 +122,7 @@ def main():
     else:
         selected_geom_transforms_transforms = [transforms.Lambda(lambda x: x)]
 
-    # Base transform
+    # Transformation de base
     base_transform = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
@@ -167,17 +175,34 @@ def main():
         train_loader = DataLoader(augmented_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
         val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False, num_workers=4)
 
+        # Initialiser le modèle
         base_encoder = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1).to(device)
         moco_model = TruncatedMoCoV3(base_encoder, truncate_layer, dim=256, device=device).to(device)
         classifier = Classifier(input_dim=256, num_classes=len(dataset.classes)).to(device)
 
-        load_best_model(classifier, moco_model, args.model_path)
+        # Charger les poids pré-entraînés si un chemin est fourni
+        if args.model_path is not None:
+            load_best_model(classifier, moco_model, args.model_path)
+            print(f"Fold {fold}: Poids du modèle chargés depuis {args.model_path}")
+        else:
+            print(f"Fold {fold}: Aucun poids pré-entraîné chargé, entraînement à partir de zéro.")
 
         criterion = nn.CrossEntropyLoss().to(device)
-        optimizer = optim.SGD(filter(lambda p: p.requires_grad, list(moco_model.parameters()) + list(classifier.parameters())), lr=lr, momentum=0.9)
+        optimizer = optim.SGD(
+            filter(lambda p: p.requires_grad, list(moco_model.parameters()) + list(classifier.parameters())),
+            lr=lr, momentum=0.9
+        )
 
-        moco_model, classifier = train_model(moco_model, classifier, train_loader, criterion, optimizer, num_epochs=args.epochs, writer=writer, fold=fold)
-        val_loss, val_accuracy, val_precision, val_recall, val_f1 = evaluate_model(moco_model, classifier, val_loader, criterion, writer=writer, fold=fold)
+        # Entraîner le modèle
+        moco_model, classifier = train_model(
+            moco_model, classifier, train_loader, criterion, optimizer,
+            num_epochs=args.epochs, writer=writer, fold=fold
+        )
+
+        # Évaluer le modèle
+        val_loss, val_accuracy, val_precision, val_recall, val_f1 = evaluate_model(
+            moco_model, classifier, val_loader, criterion, writer=writer, fold=fold
+        )
         fold_results.append((val_loss, val_accuracy, val_precision, val_recall, val_f1))
 
         fold_result = {

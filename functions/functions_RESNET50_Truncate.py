@@ -199,7 +199,7 @@ def load_best_model(classifier, moco_model, filepath):
 
     # Vérifier et ajuster les clés pour correspondre aux modèles
     # Pour moco_model, les clés doivent correspondre exactement
-    missing_keys_moco = moco_model.load_state_dict(moco_state_dict, strict=False)
+    missing_keys_moco = moco_model.load_state_dict(moco_state_dict, strict=True)
     print("Missing keys in moco_model:", missing_keys_moco.missing_keys)
 
     # Pour classifier, il faut s'assurer que les noms de couches correspondent
@@ -212,7 +212,7 @@ def load_best_model(classifier, moco_model, filepath):
             adjusted_classifier_state_dict[new_k] = v
         else:
             adjusted_classifier_state_dict[k] = v
-    missing_keys_classifier = classifier.load_state_dict(adjusted_classifier_state_dict, strict=False)
+    missing_keys_classifier = classifier.load_state_dict(adjusted_classifier_state_dict, strict=True)
     print("Missing keys in classifier:", missing_keys_classifier.missing_keys)
 
     moco_model.cuda()

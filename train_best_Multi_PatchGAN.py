@@ -13,8 +13,6 @@ from functions.functions_Multi_PatchGAN import train_model, evaluate_model
 
 # Définition des constantes globales
 
-
-
 def main():
     parser = argparse.ArgumentParser(
         description='Fine-Tuning for Image Classification with Loaded Model')
@@ -23,7 +21,7 @@ def main():
     parser.add_argument('--save_dir', default='Model_Multi_scale_PatchGAN/best', type=str, help='Directory to save trained models')
     parser.add_argument('--tensorboard', action='store_true', help='Enable TensorBoard logging')
     parser.add_argument('--k_folds', default=2, type=int, help='Number of folds for cross-validation')
-    parser.add_argument('--model_path', type=str, required=True, help='Path to model weights')
+    parser.add_argument('--model_path', type=str, required=False, help='Path to model weights')
     parser.add_argument('--config_path', type=str, required=True, help='Path to model hyperparameters configuration')
     args = parser.parse_args()
 
@@ -75,8 +73,7 @@ def main():
         train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True, num_workers=4)
         val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False, num_workers=4)
 
-        # Initialiser le modèle pour chaque fold si vous souhaitez réinitialiser les poids
-        # Si vous souhaitez continuer à entraîner le même modèle à travers les folds, commentez cette section
+        # Initialiser le modèle pour chaque fold
         model = MultiScaleDiscriminator(
             input_nc=3,
             ndf=64,
@@ -85,18 +82,21 @@ def main():
             num_classes=num_classes  # Utiliser le nombre de classes détecté
         ).to(device)
 
-        # Charger les poids pré-entraînés pour chaque fold si nécessaire
-        # Si vous avez des poids spécifiques pour chaque fold, gérez-les ici
-        pretrained_dict = torch.load(args.model_path, map_location=device)
-        model_dict = model.state_dict()
+        # Charger les poids pré-entraînés si un chemin est fourni
+        if args.model_path is not None:
+            # Charger les poids pré-entraînés
+            pretrained_dict = torch.load(args.model_path, map_location=device)
+            model_dict = model.state_dict()
 
-        # Filtrer les poids pour ignorer ceux qui ne correspondent pas en taille
-        pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict and v.size() == model_dict[k].size()}
-        model_dict.update(pretrained_dict)
-        model.load_state_dict(model_dict)
-        print(f"Fold {fold}: Poids du modèle chargés avec succès.")
+            # Filtrer les poids pour ignorer ceux qui ne correspondent pas en taille
+            pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict and v.size() == model_dict[k].size()}
+            model_dict.update(pretrained_dict)
+            model.load_state_dict(model_dict)
+            print(f"Fold {fold}: Poids du modèle chargés avec succès.")
+        else:
+            print(f"Fold {fold}: Aucun poids pré-entraîné chargé, entraînement à partir de zéro.")
 
-        # Définir la fonction de perte et l'optimizer
+        # Définir la fonction de perte et l'optimiseur
         criterion = nn.CrossEntropyLoss().to(device)
         optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
 

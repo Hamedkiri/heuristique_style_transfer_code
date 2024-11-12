@@ -9,23 +9,25 @@ from torch.utils.data import DataLoader, Subset
 from sklearn.model_selection import KFold
 from torch.utils.tensorboard import SummaryWriter
 from Models.Models_RESNET50_TRUNCATE_GRAM_with_Attention import TruncatedResNet50
-from functions.functions_RESNET50_Truncate_Gram_Attention import load_model, set_parameter_requires_grad, train_model, save_model_weights, evaluate_model
-
-
-
-
+from functions.functions_RESNET50_Truncate_Gram_Attention import (
+    load_model,
+    set_parameter_requires_grad,
+    train_model,
+    save_model_weights,
+    evaluate_model
+)
 
 def main():
     parser = argparse.ArgumentParser(
         description='ResNet50 Fine-Tuning for Classification with Hyperparameter Loading')
     parser.add_argument('--data', type=str, required=True, help='Path to dataset root directory')
-    parser.add_argument('--model_path', type=str, required=True, help='Path to the pre-trained ResNet50 model')
+    parser.add_argument('--model_path', type=str, required=False, help='Path to the pre-trained ResNet50 model')
     parser.add_argument('--epochs', default=25, type=int, help='Number of epochs to train')
     parser.add_argument('--save_dir', default='saved_models_attention_gram_resnet50', type=str, help='Directory to save trained models')
     parser.add_argument('--tensorboard', action='store_true', help='Enable TensorBoard logging')
     parser.add_argument('--k_folds', default=2, type=int, help='Number of folds for cross-validation')
     parser.add_argument('--freeze_layers', action='store_true', help='Freeze the encoder layers')
-    parser.add_argument('--config_path', type=str, help='Path to the hyperparameters JSON file to load')
+    parser.add_argument('--config_path', type=str, required=True, help='Path to the hyperparameters JSON file to load')
 
     args = parser.parse_args()
 
@@ -44,17 +46,15 @@ def main():
 
     writer = SummaryWriter(log_dir=os.path.join(args.save_dir, 'tensorboard')) if args.tensorboard else None
 
-    if args.config_path:
-        with open(args.config_path, 'r') as f:
-            hyperparams = json.load(f)
-        hidden_dims = hyperparams['hidden_dims']
-        num_layers = hyperparams['num_layers']
-        batch_size = hyperparams['batch_size']
-        lr = hyperparams['lr']
-        truncate_layer = hyperparams['truncate_layer']
-        gram_matrix_size = hyperparams['gram_matrix_size']
-    else:
-        raise ValueError("Please provide a path to a hyperparameters JSON file using --config_path.")
+    # Charger les hyperparamètres depuis le fichier de configuration
+    with open(args.config_path, 'r') as f:
+        hyperparams = json.load(f)
+    hidden_dims = hyperparams['hidden_dims']
+    num_layers = hyperparams['num_layers']
+    batch_size = hyperparams['batch_size']
+    lr = hyperparams['lr']
+    truncate_layer = hyperparams['truncate_layer']
+    gram_matrix_size = hyperparams['gram_matrix_size']
 
     kfold = KFold(n_splits=args.k_folds, shuffle=True)
 
@@ -67,30 +67,51 @@ def main():
         val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False, num_workers=4)
 
         base_encoder = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1).to(device)
-        model = TruncatedResNet50(base_encoder, truncate_layer, num_classes=len(dataset.classes),
-                                  gram_matrix_size=gram_matrix_size, device=device).to(device)
+        model = TruncatedResNet50(
+            base_encoder,
+            truncate_layer,
+            num_classes=len(dataset.classes),
+            gram_matrix_size=gram_matrix_size,
+            device=device
+        ).to(device)
 
-        load_model(model, args.model_path, device)
+        # Charger les poids pré-entraînés si un chemin est fourni
+        if args.model_path is not None:
+            load_model(model, args.model_path, device)
+            print(f"Fold {fold}: Poids du modèle chargés depuis {args.model_path}")
+        else:
+            print(f"Fold {fold}: Aucun poids pré-entraîné chargé, entraînement à partir de zéro.")
+
         set_parameter_requires_grad(model, args.freeze_layers)
 
         criterion = nn.CrossEntropyLoss().to(device)
         optimizer = optim.SGD(filter(lambda p: p.requires_grad, model.parameters()), lr=lr, momentum=0.9)
 
-        model = train_model(model, train_loader, criterion, optimizer, num_epochs=args.epochs, writer=writer, fold=fold)
-        val_loss, val_accuracy, val_precision, val_recall = evaluate_model(model, val_loader, criterion, writer=writer,
-                                                                           fold=fold)
+        model = train_model(
+            model, train_loader, criterion, optimizer,
+            num_epochs=args.epochs, writer=writer, fold=fold
+        )
+        val_loss, val_accuracy, val_precision, val_recall = evaluate_model(
+            model, val_loader, criterion, writer=writer, fold=fold
+        )
 
-        # Save model, performance and hyperparameters for each fold
+        # Sauvegarder le modèle, les performances et les hyperparamètres pour chaque fold
         fold_best_path = os.path.join(args.save_dir, f"best_model_fold_{fold}.pth")
         fold_best_perf_path = os.path.join(args.save_dir, f"best_performance_fold_{fold}.json")
         fold_hyperparams_path = os.path.join(args.save_dir, f"best_hyperparameters_fold_{fold}.json")
 
-        # Save the model and performance
+        # Sauvegarder le modèle et les performances
         save_model_weights(model, fold_best_path)
 
-        fold_best_perf = {'accuracy': val_accuracy, 'precision': val_precision, 'recall': val_recall}
+        fold_best_perf = {
+            'accuracy': val_accuracy,
+            'precision': val_precision,
+            'recall': val_recall,
+            'val_loss': val_loss
+        }
         with open(fold_best_perf_path, 'w') as f:
-            json.dump(fold_best_perf, f)
+            json.dump(fold_best_perf, f, indent=4)
+        print(f"Fold {fold} performance saved to {fold_best_perf_path}")
 
         fold_hyperparams = {
             'hidden_dims': hidden_dims,
@@ -103,10 +124,10 @@ def main():
         }
         with open(fold_hyperparams_path, 'w') as f:
             json.dump(fold_hyperparams, f, indent=4)
+        print(f"Fold {fold} hyperparameters saved to {fold_hyperparams_path}")
 
     if writer:
         writer.close()
-
 
 if __name__ == '__main__':
     main()
