@@ -1,7 +1,13 @@
 
 # Heuristic Style Transfer Code
 
-[![Watch the video](./videos/first_image.png)]([./videos/videos.mp4](https://youtu.be/TcHSnYIAMVg))
+# Heuristic Style Transfer Code
+
+[![Watch the video](videos/first_image.png)](https://www.youtube.com/watch?v=TcHSnYIAMVg)
+
+## Installing Required Packages
+...
+
 
 ## Installing Required Packages
 
