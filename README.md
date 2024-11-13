@@ -1,7 +1,7 @@
 
 # Heuristic Style Transfer Code
 
-[![Watch the video](./videos/first_image.png)](./videos/Résultats détections scènes mondes.mp4)
+[![Watch the video](./videos/first_image.png)](./videos/videos.mp4)
 
 ## Installing Required Packages
 
