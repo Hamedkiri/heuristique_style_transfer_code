@@ -3,7 +3,7 @@
 
 # Heuristic Style Transfer Code
 
-[![Watch the video](videos/first_image.png)](videos/videos.mp4)
+[![Watch the video](videos/first_image.png)]([videos/videos.mp4](https://user-images.githubusercontent.com/82286853/211151063-e3463188-65c2-470c-b14c-2277d8bbd817.mp4))
 
 ## Installing Required Packages
 ...
