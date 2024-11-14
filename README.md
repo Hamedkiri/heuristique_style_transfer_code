@@ -3,7 +3,7 @@
 
 
 
-<video src="https://github.com/Hamedkiri/heuristique_style_transfer_code/blob/main/videos/videos.mp4" controls="controls" style="max-width: 100%;">
+<video src="./videos/videos.mp4" controls="controls" style="max-width: 100%;">
     Your browser does not support the video tag.
 </video>
 
