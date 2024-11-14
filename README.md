@@ -3,9 +3,9 @@
 
 # Heuristic Style Transfer Code
 
-<video src="https://youtu.be/TcHSnYIAMVg" controls="controls" style="max-width: 100%;">
+<iframe src="https://youtu.be/TcHSnYIAMVg" controls="controls" style="max-width: 100%;">
    Your browser does not support the video tag.
-</video>
+</iframe>
 
 
 
