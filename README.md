@@ -3,7 +3,7 @@
 
 # Heuristic Style Transfer Code
 
-[![Watch the video](videos/first_image.png)](videos/videos.mp4)
+[![Watch the video](videos/first_image.png)](videos/videos_small.mp4)
 
 
 
