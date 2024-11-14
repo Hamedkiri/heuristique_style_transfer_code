@@ -5,7 +5,9 @@
 
 
 
-https://youtu.be/TcHSnYIAMVg
+
+[![Watch the video](videos/first_image.png)](https://youtu.be/TcHSnYIAMVg)
+
 
 ## Installing Required Packages
 
