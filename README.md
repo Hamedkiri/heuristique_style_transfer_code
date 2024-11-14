@@ -3,7 +3,7 @@
 
 # Heuristic Style Transfer Code
 
-[![Watch the video](videos/first_image.png)](https://www.youtube.com/watch?v=TcHSnYIAMVg)
+[![Watch the video](videos/first_image.png)](https://github.com/Hamedkiri/heuristique_style_transfer_code/blob/main/videos/videos.mp4)
 
 ## Installing Required Packages
 ...
