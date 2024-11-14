@@ -3,11 +3,9 @@
 
 # Heuristic Style Transfer Code
 
-<iframe src="https://youtu.be/TcHSnYIAMVg" controls="controls" style="max-width: 100%;">
-   Your browser does not support the video tag.
-</iframe>
 
 
+https://youtu.be/TcHSnYIAMVg
 
 ## Installing Required Packages
 
