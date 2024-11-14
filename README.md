@@ -3,7 +3,9 @@
 
 # Heuristic Style Transfer Code
 
-[![Watch the video](videos/first_image.png)](videos/videos_small.mp4)
+<video src="https://youtu.be/TcHSnYIAMVg" controls="controls" style="max-width: 100%;">
+   Your browser does not support the video tag.
+</video>
 
 
 
