@@ -3,10 +3,7 @@
 
 # Heuristic Style Transfer Code
 
-<video src="videos/videos.mp4" controls="controls" style="max-width: 100%;">
-   Your browser does not support the video tag.
-</video>
-
+[![Watch the video](videos/first_image.png)](videos/videos.mp4)
 
 
 
