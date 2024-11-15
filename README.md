@@ -26,6 +26,15 @@ pip install -r requirements.txt
 
 ## Testing the Models
 
+### Learn through video 
+
+
+
+https://github.com/user-attachments/assets/8fbd8178-ce08-44fc-bf66-f3dfc5a0672b
+
+###  Learn by reading
+
+
 To test the models, you need to specify the hyperparameters file with the `--config_path` option to rebuild the model architecture, as well as the weights file with `--model_path`.
 
 The command-line options are similar for all three models and include the following parameters:
