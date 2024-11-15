@@ -1,7 +1,7 @@
 
 # Heuristic Style Transfer Code
 
-# Heuristic Style Transfer Code
+
 
 
 
