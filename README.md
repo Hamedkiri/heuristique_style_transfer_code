@@ -1,7 +1,7 @@
 
 # Heuristic Style Transfer Code
 
-## Real-time test videos
+## Video real-time testing
 
 
 
