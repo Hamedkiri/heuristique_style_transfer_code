@@ -72,7 +72,7 @@ An optional parameter, `--measure_time`, can be added in `camera` mode to measur
 
 ## Training the Models
 
-To retrain the models, use `--config_path` to specify the architecture and `--data` for the path to the training data, with classes in a "train" subfolder (e.g., `dataset/train/fog rain snow sun`). If you want to retrain from existing weights, add the `--model_path` option. The `--save_dir` parameter specifies where to save the model weights. Other options include `--epochs` to define the number of epochs and `--k_folds` for the number of cross-validation folds.
+To retrain the models, use `--config_path` to specify the architecture and `--data` for the path to the training data, with classes in a "train" subfolder (e.g., `dataset/train/fog rain snow sun`). If you want to retrain from existing weights, add the `--model_path` option. The `--save_dir` parameter specifies where to save the model weights. Other options include `--epochs` to define the number of epochs and `--k_folds` for the number of cross-validation folds. for the data to retrain the model you can find it here: [Datasets on Google Drive](https://drive.google.com/drive/folders/1eqnTRWLPH1FbhZdvnazt01fxp0vUN47n?usp=sharing).
 
 ### Example Training Commands for Each Model
 
