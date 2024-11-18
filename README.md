@@ -30,7 +30,13 @@ pip install -r requirements.txt
 
 
 
-https://github.com/user-attachments/assets/8fbd8178-ce08-44fc-bf66-f3dfc5a0672b
+
+
+https://github.com/user-attachments/assets/9caad4cc-fbd4-44fa-9d66-7232f939e77c
+
+
+
+
 
 ###  Learn by reading
 
