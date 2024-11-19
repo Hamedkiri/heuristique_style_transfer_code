@@ -1,7 +1,7 @@
 
 # Heuristic Style Transfer Code
 
-## Video real-time testing : Weather Measurement Around the World
+## Demonstration in real-time : Weather Measurement Around the World
 
 
 
