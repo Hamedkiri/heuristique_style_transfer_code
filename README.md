@@ -1,23 +1,16 @@
 
 # Heuristic Style Transfer Code
 
-## Demonstration in real-time : Weather Measurement Around the World
-
-
-
-
-
-https://github.com/user-attachments/assets/107a542f-496b-48d7-acc6-50cd370eba04
-
-
-
-
 
 ## Main idea behind this code and the article which is associated article
 
 
 https://github.com/user-attachments/assets/c2070011-df1c-414d-8234-5e287c26fc05
 
+## Demonstration in real-time : Weather Measurement Around the World
+
+
+https://github.com/user-attachments/assets/107a542f-496b-48d7-acc6-50cd370eba04
 
 
 ## Installing Required Packages
