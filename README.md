@@ -7,8 +7,11 @@
 
 
 
+https://github.com/user-attachments/assets/e1e21979-9dd7-4b34-bc32-4cbc940cd462
 
-https://github.com/user-attachments/assets/85d4ba1e-439e-467e-a824-78b788f154fc
+
+
+
 
 
 
@@ -19,7 +22,10 @@ https://github.com/user-attachments/assets/85d4ba1e-439e-467e-a824-78b788f154fc
 ## Demonstration in real-time : Weather Measurement Around the World
 
 
-https://github.com/user-attachments/assets/107a542f-496b-48d7-acc6-50cd370eba04
+
+https://github.com/user-attachments/assets/ddb1e608-4b1c-4299-b5aa-39a46fd3a22b
+
+
 
 
 ## Installing Required Packages
@@ -38,7 +44,10 @@ pip install -r requirements.txt
 
 
 
-https://github.com/user-attachments/assets/9caad4cc-fbd4-44fa-9d66-7232f939e77c
+https://github.com/user-attachments/assets/9b1cf116-f0b1-47bc-949a-b88be71d3310
+
+
+
 
 
 
