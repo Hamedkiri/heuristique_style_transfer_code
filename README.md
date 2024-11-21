@@ -1,5 +1,5 @@
 
-# Heuristic Style Transfer Code
+# Heuristic Style Transfer: first generation (Code)
 
 
 ## Main idea behind this code and the article which is associated article
