@@ -1,5 +1,5 @@
 
-# Heuristic Style Transfer: first generation (Code)
+# Heuristic Style Transfer to weather classification: first generation (Code)
 
 
 ## Main idea behind this code and the article which is associated article
