@@ -72,7 +72,7 @@ An optional parameter, `--measure_time`, can be added in `camera` mode to measur
 
 - **Truncated ResNet50:**
   ```bash
-  python test_RESNET50_Truncate.py --config_path checkpoints/Best_ResNet50_Truncated/best_model_fold_hyperparameters_all.json --model_path checkpoints/Best_ResNet50_Truncated/best_model_fold_all.pth --num_samples 12000 --mode camera --classes fog rain snow sun
+  python test_RESNET50_Truncate.py --data ./datasets --config_path checkpoints/Best_ResNet50_Truncated/best_model_fold_hyperparameters_all.json --model_path checkpoints/Best_ResNet50_Truncated/best_model_fold_all.pth --num_samples 12000 --mode camera --classes fog rain snow sun
   ```
 
 - **Truncated ResNet50 + Gram Matrix + Attention:**
@@ -82,7 +82,7 @@ An optional parameter, `--measure_time`, can be added in `camera` mode to measur
 
 - **Multi PatchGAN:**
   ```bash
-  python test_Multi_PatchGAN.py --model_path checkpoints/Best_Multi_PatchGAN/best_model_all.pth --config_path checkpoints/Best_Multi_PatchGAN/best_hyperparameters_all.json --data ./datasets --num_samples 12000 --mode tsne_interactive
+  python test_Multi_PatchGAN.py --data ./datasets --model_path checkpoints/Best_Multi_PatchGAN/best_model_all.pth --config_path checkpoints/Best_Multi_PatchGAN/best_hyperparameters_all.json --num_samples 12000 --mode tsne_interactive
   ```
 
 ## Training the Models
