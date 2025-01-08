@@ -8,9 +8,16 @@ from torch.utils.data import DataLoader, Subset
 from sklearn.metrics import precision_score, recall_score, f1_score
 
 import random
-from Models.Models_RESNET50_TRUNCATE_GRAM_with_Attention import  TruncatedResNet50_for_test
-from functions.functions_RESNET50_Truncate_Gram_Attention import run_camera, style_transfer, load_hyperparameters, load_model_weights, evaluate_model_test, perform_tsne, plot_tsne_interactive
-
+from Models.Models_RESNET50_TRUNCATE_GRAM_with_Attention import TruncatedResNet50_for_test
+from functions.functions_RESNET50_Truncate_Gram_Attention import (
+    run_camera,
+    style_transfer,
+    load_hyperparameters,
+    load_model_weights,
+    evaluate_model_test,
+    perform_tsne,
+    plot_tsne_interactive
+)
 
 
 def main():
@@ -37,6 +44,8 @@ def main():
     parser.add_argument('--threshold', default=1e-7, type=float, help='Error threshold for style transfer')
     parser.add_argument('--learning_rate', default=0.01, type=float, help='Learning rate for style transfer')
     parser.add_argument('--num_iterations', default=500, type=int, help='Number of iterations for style transfer')
+    parser.add_argument('--afficher_params', action='store_true',
+                        help='Afficher le nombre de paramètres du modèle (TruncatedResNet50_for_test)')  # Nouvelle option
 
     args = parser.parse_args()
 
@@ -65,12 +74,20 @@ def main():
     data_loader = DataLoader(dataset, batch_size=hyperparams.get('batch_size', 32), shuffle=False, num_workers=4)
 
     base_encoder = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1).to(device)
-    model = TruncatedResNet50_for_test (base_encoder, truncate_after_layer=hyperparams.get('truncate_layer', 7),
-                              num_classes=num_classes,
-                              gram_matrix_size=hyperparams.get('gram_matrix_size', 32),
-                              device=device).to(device)
+    model = TruncatedResNet50_for_test(
+        base_encoder,
+        truncate_after_layer=hyperparams.get('truncate_layer', 7),
+        num_classes=num_classes,
+        gram_matrix_size=hyperparams.get('gram_matrix_size', 32),
+        device=device
+    ).to(device)
 
     load_model_weights(model, args.model_path)
+
+    # Affichage du nombre total de paramètres si demandé
+    if args.afficher_params:
+        total_params = sum(p.numel() for p in model.parameters())
+        print(f"Nombre total de paramètres du modèle (TruncatedResNet50_for_test) : {total_params}")
 
     if args.mode == 'classification':
         embeddings, preds, labels, img_paths = evaluate_model_test(model, data_loader, device)
@@ -95,19 +112,39 @@ def main():
 
     elif args.mode == 'tsne_interactive':
         embeddings, _, labels, img_paths = evaluate_model_test(model, data_loader, device)
-        plot_tsne_interactive(embeddings, labels,
-                              dataset.dataset.classes if isinstance(dataset, Subset) else dataset.classes, img_paths,
-                              dataset, colors=args.colors)
+        plot_tsne_interactive(
+            embeddings,
+            labels,
+            dataset.dataset.classes if isinstance(dataset, Subset) else dataset.classes,
+            img_paths,
+            dataset,
+            colors=args.colors
+        )
 
     elif args.mode == 'camera':
         if args.classes is None:
             raise ValueError("You must specify classes with the --classes option for camera mode.")
-        run_camera(model, transform, args.classes, args.save_camera_video, args.save_dir, args.prob_threshold,
-                   args.measure_time)
+        run_camera(
+            model,
+            transform,
+            args.classes,
+            args.save_camera_video,
+            args.save_dir,
+            args.prob_threshold,
+            args.measure_time
+        )
 
     elif args.mode == 'style_transfer':
-        style_transfer(model, data_loader, device, save_dir=args.save_dir, layers=args.layers, threshold=args.threshold,
-                       num_iterations=args.num_iterations, learning_rate=args.learning_rate)
+        style_transfer(
+            model,
+            data_loader,
+            device,
+            save_dir=args.save_dir,
+            layers=args.layers,
+            threshold=args.threshold,
+            num_iterations=args.num_iterations,
+            learning_rate=args.learning_rate
+        )
 
 
 if __name__ == '__main__':

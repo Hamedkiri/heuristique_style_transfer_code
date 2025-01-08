@@ -5,13 +5,20 @@ import torch
 import torch.nn as nn
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Subset
-from sklearn.metrics import  confusion_matrix
+from sklearn.metrics import confusion_matrix
 import numpy as np
 
 from Models.Models_Multi_PatchGAN import MultiScaleDiscriminator_test
-from functions.functions_Multi_PatchGAN import convert_to_serializable, run_camera, evaluate_model_test, plot_tsne, plot_tsne_interactive, plot_confusion_matrix, style_transfer_patches, evaluate_classification
-
-
+from functions.functions_Multi_PatchGAN import (
+    convert_to_serializable,
+    run_camera,
+    evaluate_model_test,
+    plot_tsne,
+    plot_tsne_interactive,
+    plot_confusion_matrix,
+    style_transfer_patches,
+    evaluate_classification
+)
 
 
 def main():
@@ -40,6 +47,9 @@ def main():
     parser.add_argument('--threshold', default=1e-4, type=float, help='Seuil d\'erreur pour le style transfer')
     parser.add_argument('--learning_rate', default=0.01, type=float, help='Taux d\'apprentissage pour le style transfer')
     parser.add_argument('--num_iterations', default=500, type=int, help='Nombre d\'itérations pour le style transfer')
+    parser.add_argument('--afficher_params', action='store_true',
+                        help='Afficher le nombre total de paramètres du modèle (MultiScaleDiscriminator_test)')  # Nouvelle option
+
     args = parser.parse_args()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -81,6 +91,11 @@ def main():
     model_state = torch.load(args.model_path, map_location=device)
     model.load_state_dict(model_state)
 
+    # Affichage du nombre total de paramètres si demandé
+    if args.afficher_params:
+        total_params = sum(p.numel() for p in model.parameters())
+        print(f"Nombre total de paramètres du modèle (MultiScaleDiscriminator_test) : {total_params}")
+
     if args.mode == 'camera':
         if args.classes is None:
             raise ValueError("Vous devez spécifier les classes avec l'option --classes en mode caméra.")
@@ -108,10 +123,22 @@ def main():
             img_paths = [sample[0] for sample in test_dataset.samples]
 
         if args.mode == 'tsne':
-            plot_tsne(embeddings, labels, test_dataset.dataset.classes if isinstance(test_dataset, Subset) else test_dataset.classes, colors=args.colors, save_dir=args.save_dir)
+            plot_tsne(
+                embeddings,
+                labels,
+                test_dataset.dataset.classes if isinstance(test_dataset, Subset) else test_dataset.classes,
+                colors=args.colors,
+                save_dir=args.save_dir
+            )
         else:
-            plot_tsne_interactive(embeddings, labels, test_dataset.dataset.classes if isinstance(test_dataset, Subset) else test_dataset.classes, img_paths, test_dataset,
-                                  colors=args.colors)
+            plot_tsne_interactive(
+                embeddings,
+                labels,
+                test_dataset.dataset.classes if isinstance(test_dataset, Subset) else test_dataset.classes,
+                img_paths,
+                test_dataset,
+                colors=args.colors
+            )
 
     elif args.mode == 'style_transfer':
         test_dataset = datasets.ImageFolder(root=os.path.join(args.data, 'test'), transform=transform)
@@ -123,9 +150,16 @@ def main():
             test_dataset = Subset(test_dataset, indices)
 
         test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=4)
-        style_transfer_patches(model, test_loader, device, save_dir=args.save_dir, layers=args.layers,
-                               threshold=args.threshold,
-                               num_iterations=args.num_iterations, learning_rate=args.learning_rate)
+        style_transfer_patches(
+            model,
+            test_loader,
+            device,
+            save_dir=args.save_dir,
+            layers=args.layers,
+            threshold=args.threshold,
+            num_iterations=args.num_iterations,
+            learning_rate=args.learning_rate
+        )
 
     elif args.mode == 'classification':
         test_dataset = datasets.ImageFolder(root=os.path.join(args.data, 'test'), transform=transform)
@@ -172,7 +206,6 @@ def main():
             json.dump(results, f, indent=4, default=convert_to_serializable)
 
         print(f"Résultats de classification sauvegardés dans {results_path}")
-
 
 
 if __name__ == '__main__':

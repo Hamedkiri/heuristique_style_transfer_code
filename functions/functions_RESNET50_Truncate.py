@@ -17,6 +17,7 @@ from pykalman import KalmanFilter
 import os
 import json
 import torch
+import torch.nn as nn
 
 from torchvision import datasets, transforms, models
 from torch.utils.data import Subset, Dataset
@@ -377,7 +378,16 @@ def run_camera(classifier, moco_model, transform, class_names, save_video, save_
         out.release()
     cv2.destroyAllWindows()
 
+class CombinedModel(nn.Module):
+    def __init__(self, moco_model, classifier):
+        super(CombinedModel, self).__init__()
+        self.moco_model = moco_model
+        self.classifier = classifier
 
+    def forward(self, x):
+        features = self.moco_model(x)
+        output = self.classifier(features)
+        return output
 def compute_embeddings_with_paths(model, loader, device):
     model.eval()
     all_embeddings = []

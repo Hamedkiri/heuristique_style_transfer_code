@@ -50,6 +50,7 @@ def main():
     parser.add_argument('--colormap', type=str, default='hot', help='Colormap pour les visualisations Grad-CAM (par exemple, hot, autumn, afmhot)')
     parser.add_argument('--compute_auc', action='store_true', help='Calculer le score AUC pour le modèle')
     parser.add_argument('--classes', nargs='+', type=str, help='Liste des classes à utiliser lors de l\'utilisation du mode caméra')  # Nouvelle option
+    parser.add_argument('--afficher_params', action='store_true', help='Afficher le nombre de paramètres du modèle (MoCo + Classifier)')  # Option pour afficher le nb de paramètres
 
     args = parser.parse_args()
 
@@ -109,6 +110,11 @@ def main():
     moco_model = TruncatedMoCoV3(moco_base, truncate_layer, dim=256, device='cuda')
     classifier = Classifier(input_dim=256, num_classes=len(class_names))
     load_best_model(classifier, moco_model, args.model_path)
+
+    # Afficher le nombre total de paramètres du modèle si demandé
+    if args.afficher_params:
+        total_params = sum(p.numel() for p in moco_model.parameters()) + sum(p.numel() for p in classifier.parameters())
+        print(f"Nombre total de paramètres du modèle (MoCo + Classifier) : {total_params}")
 
     # Modes d'opération
     if args.mode == 'classification':
