@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="pytorch-CycleGAN-and-pix2pix-master_test" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="pytorch-CycleGAN-and-pix2pix-master_test" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="heuristique_style_transfer_code" project-jdk-type="Python SDK" />
 </project>

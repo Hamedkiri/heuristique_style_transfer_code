@@ -18,6 +18,7 @@ from tkinter import ttk
 import cv2
 import time
 from datetime import datetime
+import torch.nn.functional as F
 
 torch.autograd.set_detect_anomaly(True)  # Pour activer la détection d'anomalies
 
@@ -176,23 +177,51 @@ def evaluate_model(model, val_loader, criterion, writer=None, fold=0):
 
 def evaluate_model_test(model, data_loader, device):
     model.eval()
-    all_preds = []
-    all_labels = []
-    all_embeddings = []
-    img_paths = []
+    all_preds       = []
+    all_labels      = []
+    all_embeddings  = []
+    all_probs       = []
+    img_paths       = []
+
     with torch.no_grad():
-        for inputs, labels in data_loader:
+        for batch_idx, (inputs, labels) in enumerate(data_loader):
             inputs, labels = inputs.to(device), labels.to(device)
+
+            # Votre modèle renvoie embeddings et logits
             embeddings, outputs = model(inputs)
+
+            # Stockage des embeddings
             all_embeddings.append(embeddings.cpu().numpy())
+
+            # Calcul des probabilités softmax
+            probs = F.softmax(outputs, dim=1)
+            all_probs.append(probs.cpu().numpy())
+
+            # Prédictions finales
             _, preds = torch.max(outputs, 1)
             all_preds.extend(preds.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
+
+            # Récupération des chemins d'images de CE batch uniquement
+            batch_size = inputs.size(0)
+            start_idx  = batch_idx * data_loader.batch_size
             if isinstance(data_loader.dataset, Subset):
-                img_paths.extend([data_loader.dataset.dataset.samples[i][0] for i in data_loader.dataset.indices])
+                subset_indices = data_loader.dataset.indices
+                for j in range(batch_size):
+                    orig_idx = subset_indices[start_idx + j]
+                    img_paths.append(data_loader.dataset.dataset.samples[orig_idx][0])
             else:
-                img_paths.extend([sample[0] for sample in data_loader.dataset.samples])
-    return np.concatenate(all_embeddings), np.array(all_preds), np.array(all_labels), img_paths
+                for j in range(batch_size):
+                    img_paths.append(data_loader.dataset.samples[start_idx + j][0])
+
+    # Concaténation des listes
+    all_embeddings = np.concatenate(all_embeddings, axis=0)
+    all_probs      = np.concatenate(all_probs, axis=0)
+    all_preds      = np.array(all_preds)
+    all_labels     = np.array(all_labels)
+
+    # Maintenant on renvoie 5 éléments
+    return all_embeddings, all_preds, all_labels, all_probs, img_paths
 
 def set_parameter_requires_grad(model, freeze_encoder):
     if freeze_encoder:

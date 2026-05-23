@@ -705,15 +705,21 @@ def test(classifier, moco_model, loader, criterion, writer, class_names, save_di
 
     with torch.no_grad():
         for i, (data, target) in enumerate(loader):
+            batch_size_current = data.size(0)
+            start_idx = i * loader.batch_size
+
             if isinstance(loader.dataset, Subset):
+                # Pour Subset : on prend les bons indices dans loader.dataset.indices
+                subset_indices = loader.dataset.indices
                 original_images = [
-                    loader.dataset.dataset.imgs[idx][0]
-                    for idx in loader.dataset.indices[i * loader.batch_size:(i + 1) * loader.batch_size]
+                    loader.dataset.dataset.imgs[subset_indices[start_idx + j]][0]
+                    for j in range(batch_size_current)
                 ]
             else:
+                # Pour ImageFolder direct : on indexe imgs sur start_idx + j
                 original_images = [
-                    loader.dataset.imgs[idx][0]
-                    for idx in range(i * loader.batch_size, (i + 1) * loader.batch_size)
+                    loader.dataset.imgs[start_idx + j][0]
+                    for j in range(batch_size_current)
                 ]
 
             start_time = time.time()

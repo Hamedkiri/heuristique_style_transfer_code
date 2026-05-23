@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Subset
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, roc_auc_score
 import numpy as np
 
 from Models.Models_Multi_PatchGAN import MultiScaleDiscriminator_test
@@ -49,6 +49,7 @@ def main():
     parser.add_argument('--num_iterations', default=500, type=int, help='Nombre d\'itérations pour le style transfer')
     parser.add_argument('--afficher_params', action='store_true',
                         help='Afficher le nombre total de paramètres du modèle (MultiScaleDiscriminator_test)')  # Nouvelle option
+    parser.add_argument('--compute_auc', action='store_true', help='Calculer le score AUC pour le modèle')
 
     args = parser.parse_args()
 
@@ -161,48 +162,94 @@ def main():
             learning_rate=args.learning_rate
         )
 
+
     elif args.mode == 'classification':
+
         test_dataset = datasets.ImageFolder(root=os.path.join(args.data, 'test'), transform=transform)
 
-        if args.num_samples:
-            indices = list(range(len(test_dataset)))
-            np.random.shuffle(indices)
-            indices = indices[:args.num_samples]
-            test_dataset = Subset(test_dataset, indices)
+        # … vos num_samples / Subset …
 
         test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
-        precision, recall, f1, all_preds, all_labels = evaluate_classification(model, test_loader, device)
+        # maintenant evaluate_classification renvoie 6 éléments
 
-        # Calcul de l'accuracy
-        accuracy = np.mean(np.array(all_preds) == np.array(all_labels))
+        precision, recall, f1, all_preds, all_labels, all_probs = evaluate_classification(model, test_loader, device)
+
+        # Accuracy
+
+        accuracy = np.mean(all_preds == all_labels)
 
         print(f'Accuracy: {accuracy:.4f}')
+
         print(f'Precision: {precision:.4f}')
+
         print(f'Recall: {recall:.4f}')
+
         print(f'F1 Score: {f1:.4f}')
 
-        # Création du répertoire de sortie si nécessaire
-        if not os.path.exists(args.save_dir):
-            os.makedirs(args.save_dir)
+        # Matrice de confusion, affichage…
 
-        # Génération de la matrice de confusion
         cm = confusion_matrix(all_labels, all_preds)
-        classes = test_dataset.dataset.classes if isinstance(test_dataset, Subset) else test_dataset.classes
-        plot_confusion_matrix(cm, classes, args.save_dir)
 
-        # Sauvegarder les résultats de classification
+        classes = test_dataset.dataset.classes if isinstance(test_dataset, Subset) else test_dataset.classes
+
+        #plot_confusion_matrix(cm, classes, args.save_dir)
+
+        # Préparez vos résultats
+
         results = {
+
             "accuracy": float(accuracy),
+
             "precision": float(precision),
+
             "recall": float(recall),
+
             "f1_score": float(f1),
+
             "predictions": [int(p) for p in all_preds],
+
             "labels": [int(l) for l in all_labels]
+
         }
 
+        # Calcul conditionnel de l’AUC
+
+        if args.compute_auc:
+
+            try:
+
+                if all_probs.shape[1] > 2:
+
+                    auc = roc_auc_score(all_labels, all_probs,
+
+                                        multi_class='ovr', average='weighted')
+
+                else:
+
+                    auc = roc_auc_score(all_labels, all_probs[:, 1])
+
+            except ValueError as e:
+
+                print(f"[WARNING] Impossible de calculer l'AUC : {e}")
+
+                auc = None
+
+            results["auc"] = None if auc is None else float(auc)
+
+            if auc is not None:
+                print(f"AUC Score: {auc:.4f}")
+
+        # Sauvegarde
+
+
+        if not os.path.isdir(args.save_dir):
+            os.makedirs(args.save_dir, exist_ok=True)
+
         results_path = os.path.join(args.save_dir, "classification_results.json")
+
         with open(results_path, 'w') as f:
+
             json.dump(results, f, indent=4, default=convert_to_serializable)
 
         print(f"Résultats de classification sauvegardés dans {results_path}")

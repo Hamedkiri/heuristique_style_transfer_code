@@ -5,8 +5,7 @@ import torch
 
 from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader, Subset
-from sklearn.metrics import precision_score, recall_score, f1_score
-
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score
 import random
 from Models.Models_RESNET50_TRUNCATE_GRAM_with_Attention import TruncatedResNet50_for_test
 from functions.functions_RESNET50_Truncate_Gram_Attention import (
@@ -46,6 +45,7 @@ def main():
     parser.add_argument('--num_iterations', default=500, type=int, help='Number of iterations for style transfer')
     parser.add_argument('--afficher_params', action='store_true',
                         help='Afficher le nombre de paramètres du modèle (TruncatedResNet50_for_test)')  # Nouvelle option
+    parser.add_argument('--compute_auc', action='store_true', help='Calculer le score AUC pour le modèle')
 
     args = parser.parse_args()
 
@@ -90,16 +90,33 @@ def main():
         print(f"Nombre total de paramètres du modèle (TruncatedResNet50_for_test) : {total_params}")
 
     if args.mode == 'classification':
-        embeddings, preds, labels, img_paths = evaluate_model_test(model, data_loader, device)
-        precision = precision_score(labels, preds, average='weighted')
-        recall = recall_score(labels, preds, average='weighted')
-        f1 = f1_score(labels, preds, average='weighted')
+        # NOTE : on suppose maintenant que evaluate_model_test renvoie aussi un tableau de probabilités `probs`
+        embeddings, preds, labels, probs, img_paths = evaluate_model_test(model, data_loader, device)
+
+        precision = precision_score(labels, preds, average='weighted', zero_division=0)
+        recall = recall_score(labels, preds, average='weighted', zero_division=0)
+        f1 = f1_score(labels, preds, average='weighted', zero_division=0)
 
         results = {
             'precision': precision,
             'recall': recall,
             'f1_score': f1
         }
+
+        if args.compute_auc:
+            from sklearn.metrics import roc_auc_score
+            import numpy as np
+            try:
+                if len(np.unique(labels)) > 2:
+                    auc = roc_auc_score(labels, probs, multi_class='ovr', average='weighted')
+                else:
+                    auc = roc_auc_score(labels, probs[:, 1])
+            except ValueError as e:
+                print(f"[WARNING] Impossible de calculer l'AUC : {e}")
+                auc = None
+            results['auc'] = auc
+
+        # Sauvegarde
         results_path = os.path.join(args.save_dir, 'classification_results.json')
         with open(results_path, 'w') as f:
             json.dump(results, f, indent=4)

@@ -17,6 +17,7 @@ from PIL import Image, ImageTk
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+import torch.nn.functional as F
 
 
 
@@ -192,21 +193,31 @@ def evaluate_model_test(model, test_loader, criterion, measure_time=False):
 def evaluate_classification(model, test_loader, device):
     model.to(device)
     model.eval()
-    all_preds = []
+    all_preds  = []
     all_labels = []
+    all_probs  = []
+
     with torch.no_grad():
         for inputs, labels in test_loader:
             inputs, labels = inputs.to(device), labels.to(device)
-            _, outputs = model(inputs)
-            _, preds = torch.max(outputs, 1)
-            all_preds.extend(preds.cpu().numpy())
-            all_labels.extend(labels.cpu().numpy())
+            embeddings, outputs = model(inputs)
+
+            probs = F.softmax(outputs, dim=1)            # [B, C]
+            _, preds = torch.max(outputs, 1)             # [B]
+
+            all_probs.extend(probs.cpu().numpy())        # liste de [C]-arrays
+            all_preds.extend(preds.cpu().numpy())        # liste d’ints
+            all_labels.extend(labels.cpu().numpy())      # liste d’ints
+
+    all_preds  = np.array(all_preds)
+    all_labels = np.array(all_labels)
+    all_probs  = np.stack(all_probs, axis=0)          # [N, C]
 
     precision = precision_score(all_labels, all_preds, average='weighted', zero_division=0)
-    recall = recall_score(all_labels, all_preds, average='weighted', zero_division=0)
-    f1 = f1_score(all_labels, all_preds, average='weighted', zero_division=0)
+    recall    = recall_score   (all_labels, all_preds, average='weighted', zero_division=0)
+    f1        = f1_score       (all_labels, all_preds, average='weighted', zero_division=0)
 
-    return precision, recall, f1, all_preds, all_labels
+    return precision, recall, f1, all_preds, all_labels, all_probs
 
 def style_transfer_patches(model, data_loader, device, save_dir, layers=None, threshold=1e-4, num_iterations=500,
                            learning_rate=0.01, max_images=None):
